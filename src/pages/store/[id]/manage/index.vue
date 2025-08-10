@@ -3,16 +3,14 @@
 
     <div class="grid grid-cols-[50%_50%]">
       <!-- Quản lý đơn hàng -->
-      <div
+      <NuxtLink :to='`/store/${id}/manage/management/order`'
         class="m-4 bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow text-center border border-gray-200">
         <div class="text-xl font-semibold text-gray-800">Quản lý đơn hàng</div>
-        <div class="text-4xl text-blue-600 font-bold mb-2">XX</div>
+        <div class="text-4xl text-blue-600 font-bold mb-2">{{ pendingOrderCount }}</div>
         <div class="text-gray-600 text-sm mb-3">đơn hàng cần xử lý</div>
-      </div>
+      </NuxtLink>
 
       <!-- Quản lý sản phẩm -->
-      <h1>Vấn đề còn lại là thiếu các Confirm Form, làm tiếp phần nạp tiền, mua bán sản phẩm, phần hóa đơn, nhớ đẩy code lên github trước</h1>
-
   
       <NuxtLink :to='`/store/${id}/manage/management/product`'
         class="m-4 bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow text-center border border-gray-200">
@@ -65,6 +63,8 @@ definePageMeta({
   middleware: ['is-store-owner']
 });
 
+const pendingOrderCount = ref(0);
+
 const isProductDetailsVisible = ref(false);
 const route = useRoute()
 const id = computed(() => route.params.id)
@@ -76,6 +76,15 @@ const {$api} = useNuxtApp();
 const selectedProduct = ref(null);
 const currentPage = ref(0);
 const totalPages = ref(1);
+
+const fetchPendingOrders = async () => {
+  try {
+    const response = await $api.get(`subOrders/XacNhanById/${user.value.maGHDT}?page=0&size=1000`);
+    pendingOrderCount.value = response.data?.totalElements || 0;
+  } catch (error) {
+    console.error("Lỗi khi lấy đơn hàng:", error);
+  }
+};
 
 
 const getProducts = async () => {
@@ -95,7 +104,6 @@ const getProducts = async () => {
     currentPage.value = response.pageable.pageNumber;
     totalPages.value = response.totalPages;
     products.value = response.content;
-    console.log(response);
   }
 };
 
@@ -129,8 +137,9 @@ onMounted(async () => {
 
   user.value = authStore.user;
 
-  if (user) {
+  if (user.value) {
     getProducts();
+    fetchPendingOrders();
   }
 
 })

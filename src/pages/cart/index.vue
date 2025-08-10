@@ -87,36 +87,39 @@
       </div>
 
       <!-- Tổng thanh toán -->
-      <!-- <div class="lg:w-1/3">
-          <div class="bg-white rounded-lg shadow p-4 sticky top-4">
-            <h2 class="text-lg font-bold mb-4">Tổng thanh toán</h2>
+      <div class="lg:w-1/3">
+        <div class="bg-white rounded-2xl shadow-xl p-6 sticky top-4 border border-gray-100">
+          <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
+            <i class="fas fa-receipt text-emerald-500"></i>
+            <span>Tổng thanh toán</span>
+          </h2>
 
-            <div class="space-y-2 mb-4">
-              <div class="flex justify-between">
-                <span>Tổng sản phẩm:</span>
-                <span>{{ selectedItemsTotalQuantity }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Tạm tính:</span>
-                <span>{{ formatPrice(selectedItemsTotalPrice) }}</span>
-              </div>
+          <div class="space-y-3 mb-6 text-sm text-gray-700">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Tổng sản phẩm:</span>
+              <span class="font-medium">{{ selectedItemsTotalQuantity }}</span>
             </div>
-
-            <div class="border-t pt-3 mt-3">
-              <div class="flex justify-between items-center mb-4">
-                <span class="font-bold">Thành tiền:</span>
-                <span class="text-xl font-bold text-red-600">{{
-                  formatPrice(selectedItemsTotalPrice)
-                }}</span>
-              </div>
-
-              <button @click="checkout" :disabled="!hasSelectedItems"
-                :class="`w-full py-3 rounded font-medium ${hasSelectedItems ? 'bg-emerald-400 hover:bg-emerald-500 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`">
-                Thanh toán
-              </button>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Tạm tính:</span>
+              <span class="font-medium">{{ formatPrice(selectedItemsTotalPrice) }}</span>
             </div>
           </div>
-        </div> -->
+
+          <div class="border-t border-dashed pt-4">
+            <div class="flex justify-between items-center mb-6">
+              <span class="text-base font-semibold text-gray-800">Thành tiền:</span>
+              <span class="text-2xl font-bold text-red-500">{{ formatPrice(selectedItemsTotalPrice) }}</span>
+            </div>
+
+            <button @click="checkout" :disabled="!hasSelectedItems" class="w-full py-3 rounded-xl font-semibold transition-colors duration-300 text-white text-center 
+                disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed
+                bg-emerald-500 hover:bg-emerald-600" :class="{ 'cursor-not-allowed': !hasSelectedItems }">
+              Thanh toán
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Modal xác nhận xóa sản phẩm -->
@@ -142,37 +145,9 @@
         </div>
       </div>
     </Teleport>
-
-    <!-- Modal thông báo số lượng không đủ -->
-    <!-- <Teleport to="body">
-        <div v-if="quantityModal.show"
-          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 class="text-lg font-medium mb-4">Số lượng không đủ</h3>
-            <p>
-              Sản phẩm
-              <span class="font-medium">{{ quantityModal.productName }}</span> hiện
-              chỉ còn {{ quantityModal.availableQuantity }} sản phẩm.
-            </p>
-            <div class="mt-6 flex justify-end">
-              <button @click="adjustQuantity"
-                class="bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md mr-2">
-                Điều chỉnh số lượng
-              </button>
-              <button @click="quantityModal.show = false"
-                class="bg-gray-200 text-gray-800 hover:bg-gray-300 px-4 py-2 rounded-md">
-                Đóng
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-      </Teleport> -->
-    <!-- </ClientOnly> -->
   </div>
-  <!-- <Checkout :show="isCheckoutModalVisible" :products="cartItems.filter((item) => item.selected)" :userId="userId"
-    @close="isCheckoutModalVisible = false" @order-success="handleOrderSuccess" @notification="handleNotification" /> -->
+  <Checkout :show="isCheckoutModalVisible" :products="cartItems.filter((item) => item.selected)" :userId="userId"
+    @close="isCheckoutModalVisible = false" @order-success="handleOrderSuccess" @notification="handleNotification" />
   <Modal :show="showModal" :type="modalType" :title="titleModal" :message="message" :confirmText="confirmText"
     @confirm="handleConfirm()" @cancel="showModal = false" @close="showModal = false" />
 </template>
@@ -199,6 +174,14 @@ const quantityModal = reactive({
   availableQuantity: 0,
   itemToAdjust: null,
 });
+
+const notification = ref(
+  {
+    show: false,
+    type: "",
+    message: "",
+  }
+);
 
 const showModal = ref(false);
 const modalType = ref(null);
@@ -229,21 +212,22 @@ const showModalConfirm = (element, item) => {
     }
     case 'HIDED': {
       handleConfirm.value = async () => {
-        if(item.sanPham){
+        if (item.sanPham) {
           cartItems.value = cartItems.value.filter(
             (itemCart) =>
-            !(
-              itemCart.maSP === item.sanPham.maSP
-            )
-          );}
-          const response = await ($api.delete(`students/cart/delete/${userId.value}`, {
-            data: {
-              idGioHang: authStore.user.idGioHang,
-              idSP: item.sanPham.maSP,
-            }
-          }))
+              !(
+                itemCart.maSP === item.sanPham.maSP
+              )
+          );
+        }
+        const response = await ($api.delete(`students/cart/delete/${userId.value}`, {
+          data: {
+            idGioHang: authStore.user.idGioHang,
+            idSP: item.sanPham.maSP,
+          }
+        }))
 
-          showModal.value = false;
+        showModal.value = false;
 
       };
       modalType.value = "warning";
@@ -269,20 +253,22 @@ const areAllSelected = computed(
 );
 
 
-// const selectedItemsTotalQuantity = computed(() =>
-//   cartItems.value
-//     .filter((item) => item.selected)
-//     .reduce((total, item) => total + item.soLuong_GH, 0)
-// );
+const selectedItemsTotalQuantity = computed(() =>
+  cartItems.value
+    .filter((item) => item.selected)
+    .reduce((total, item) => total + item.soLuong, 0)
+);
 
-// const selectedItemsTotalPrice = computed(() =>
-//   cartItems.value
-//     .filter((item) => item.selected)
-//     .reduce(
-//       (total, item) => total + item.soLuong_GH * item.thongTinSanPham.ttBanHang_SP.giaBan_BH,
-//       0
-//     )
-// );
+const selectedItemsTotalPrice = computed(() => {
+  const totalPrice = cartItems.value
+    .filter((item) => item.selected)
+    .reduce(
+      (total, item) => total + item.soLuong * item.sanPham.giaSP,
+      0
+    )
+  return totalPrice
+})
+
 
 // Format giá tiền theo định dạng VND
 function formatPrice(price) {
@@ -390,7 +376,7 @@ async function confirmDelete() {
           await cartStore.fetchCartCount(userId.value, authStore.accessToken);
           showModalConfirm(response.data);
         } catch (error) {
-          showModalConfirm(error.response?.data,  {sanPham : { maSP: item.maSP } });
+          showModalConfirm(error.response?.data, { sanPham: { maSP: item.maSP } });
         }
       }
     }
@@ -402,32 +388,33 @@ async function confirmDelete() {
 }
 
 // Tiến hành thanh toán
-// function checkout() {
-//   if (!hasSelectedItems.value) return;
+const checkout = () => {
+  if (!hasSelectedItems.value) return;
 
-//   // Hiển thị modal thanh toán
-//   isCheckoutModalVisible.value = true;
-// }
+  // Hiển thị modal thanh toán
+  isCheckoutModalVisible.value = true;
+}
 
 // Thêm state quản lý hiển thị modal checkout
 const isCheckoutModalVisible = ref(false);
 
 // Xử lý khi đặt hàng thành công
-// function handleOrderSuccess(orderData) {
-//   // Cập nhật UI - loại bỏ sản phẩm đã đặt hàng khỏi giỏ hàng
-//   cartItems.value = cartItems.value.filter((item) => !item.selected);
+const handleOrderSuccess = (orderData) => {
+  // Cập nhật UI - loại bỏ sản phẩm đã đặt hàng khỏi giỏ hàng
+  cartItems.value = cartItems.value.filter((item) => !item.selected);
 
-//   if (orderData.orderId) {
-//     navigateTo(`/orders/${orderData.orderId}`);
-//   }
-// }
+  if (orderData.orderId) {
+    navigateTo(`/orders/${orderData.orderId}`);
+  }
+}
 
 // Xử lý hiển thị thông báo
-// function handleNotification(notificationData) {
-//   notification.type = notificationData.type;
-//   notification.message = notificationData.message;
-//   notification.show = true;
-// }
+const handleNotification = (notificationData) => {
+  notification.value.type = notificationData.type;
+  notification.value.message = notificationData.message;
+  notification.value.show = true;
+  showModalConfirm(notification.value);
+}
 
 
 

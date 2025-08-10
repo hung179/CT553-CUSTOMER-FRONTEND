@@ -45,8 +45,6 @@ const baseInf = ref(null);
 const salesInf = ref(null);
 
 const validateForm = () => {
-    console.log(baseInf.value.validateForm())
-    console.log(salesInf.value.validateForm())
     return (baseInf.value.validateForm() && salesInf.value.validateForm());
 };
 
@@ -66,10 +64,7 @@ const cancel = () => {
 
 const emit = defineEmits(["submit"]);
 const submit = () => {
-    console.log(validateForm())
     if (validateForm()) {
-            console.log("Ở đây")
-
         emit("submit", sanPham);
     } else {
         // Thông báo lỗi 
@@ -105,7 +100,7 @@ const { $api } = useNuxtApp();
 async function getProduct(id) {
     try {
         const res = await $api.get(`products/${id}`);
-        
+
         // ✅ Mapping dữ liệu chính xác
         sanPham.maSP = res.data.maSP;
         sanPham.images = res.data.images;

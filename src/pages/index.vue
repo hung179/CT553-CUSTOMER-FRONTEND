@@ -163,7 +163,6 @@ onMounted(async () => {
 
 const getProduct = async () => {
   try {
-    console.log(authStore.user.maGHDT);
     const response = (
       await $api.get(`/products/all/${authStore.user.maGHDT}`, {
         params: {
@@ -172,7 +171,6 @@ const getProduct = async () => {
         },
       })
     ).data;
-    console.log(response);
     const data = await response.content;
     products.value = data;
   } catch (error) {
@@ -211,6 +209,7 @@ const addToCart = async (product, variant = null, quantity = 1) => {
       await $api.post(`/students/cart/byId/${userId.value}`, itemId)
     ).data;
 
+
     if (isInCart) {
       const data = {
         maSP: product.maSP,
@@ -226,7 +225,7 @@ const addToCart = async (product, variant = null, quantity = 1) => {
         soLuong: quantity,
       };
       const response = (
-        await $api.patch(`/students/cart/updateItem/${userId.value}`, data)
+        await $api.post(`/students/cart/addItem/${userId.value}`, data)
       ).data;
       await cartStore.fetchCartCount(userId.value, authStore.accessToken);
 

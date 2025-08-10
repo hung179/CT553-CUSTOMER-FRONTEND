@@ -11,7 +11,7 @@
                     Ảnh đại diện sản phẩm
                 </div>
                 <div class="flex-1 flex">
-                    <!-- Sử dụng computed để đảm bảo an toàn -->
+
                     <div v-for="(image, i) in daiDienImages" :key="i" class="flex-1 flex">
                         <div v-if="image" class="relative group w-20 h-20">
                             <!-- Hiển thị ảnh sau khi chọn -->
@@ -79,7 +79,7 @@
                             class="relative group w-20 h-20 rounded-md">
                             <img :src="image.url" alt="Product Image"
                                 class="w-full h-full object-cover rounded-md border-[1px] border-zinc-300" />
-                            <div @click="deleteImg(index, image.public_id)"
+                            <div @click="deleteImg(index, image.publicId)"
                                 class="absolute bottom-0 w-full h-fit bg-zinc-200/90 rounded-b-md group-hover:flex justify-center items-center py-1 hidden cursor-pointer">
                                 <Icon name="material-symbols:delete-outline-rounded" size="18" class="text-white" />
                             </div>
@@ -301,19 +301,16 @@ const handleFileChange_imgs = (event) => {
 };
 
 const removeImgCover = () => {
-    if (!props.sanPham.newImageDtos) return;
-    
-    // Tìm index của ảnh đại diện trong newImageDtos
-    const coverIndex = props.sanPham.newImageDtos.findIndex(dto => dto.loaiAnh === 'DAIDIEN');
-
+    if (!props.sanPham.newImageDtos || !props.sanPham.newFiles) return;
+        
+    // ✅ Tìm index của ảnh đại diện trong newImageDtos
+    const coverIndex = props.sanPham.newImageDtos.findIndex(dto => dto.loaiAnh === 'Đại diện');
     if (coverIndex !== -1) {
-        // Xóa file khỏi newFiles
-        if (props.sanPham.newFiles) {
-            props.sanPham.newFiles.splice(coverIndex, 1);
-        }
-
+        // Xóa file tương ứng khỏi newFiles
+        props.sanPham.newFiles.splice(coverIndex, 1);
         // Xóa ImageDto khỏi newImageDtos
         props.sanPham.newImageDtos.splice(coverIndex, 1);
+        
     }
 
     // Reset preview
@@ -325,20 +322,11 @@ const deleteImgCover = () => {
     if (!props.sanPham.images) return;
     
     const daiDienImage = props.sanPham.images.find(img => img.loaiAnh === 'DAIDIEN');
-
     if (daiDienImage) {
         // Xóa khỏi danh sách images
         const index = props.sanPham.images.findIndex(img => img.loaiAnh === 'DAIDIEN');
         if (index !== -1) {
             props.sanPham.images.splice(index, 1);
-        }
-        
-        // Thêm vào danh sách xóa nếu cần
-        if (!props.sanPham.ttAnhXoa_SP) {
-            props.sanPham.ttAnhXoa_SP = [];
-        }
-        if (daiDienImage.public_id) {
-            props.sanPham.ttAnhXoa_SP.push(daiDienImage.public_id);
         }
     }
 };
@@ -346,16 +334,21 @@ const deleteImgCover = () => {
 // Xóa ảnh mô tả mới (chưa upload)
 const removeImg = (index) => {
     if (!props.sanPham.newImageDtos || !props.sanPham.newFiles) return;
-    
-    // Tính toán index thực tế trong newFiles/newImageDtos
-    const moTaImageDtos = props.sanPham.newImageDtos.filter(dto => dto.loaiAnh === 'MOTA');
-    const startIndex = props.sanPham.newImageDtos.length - moTaImageDtos.length;
-    const actualIndex = startIndex + index;
 
-    if (actualIndex >= 0 && actualIndex < props.sanPham.newFiles.length) {
+    // ✅ Lấy danh sách các index của ảnh Mô tả trong newImageDtos
+    const moTaIndexes = [];
+    props.sanPham.newImageDtos.forEach((dto, i) => {
+        if (dto.loaiAnh === 'Mô tả') {
+            moTaIndexes.push(i);
+        }
+    });
+    
+    // ✅ Tìm index thực tế cần xóa
+    const actualIndex = moTaIndexes[index];
+    
+    if (actualIndex !== undefined && actualIndex >= 0) {
         // Xóa file khỏi newFiles
         props.sanPham.newFiles.splice(actualIndex, 1);
-
         // Xóa ImageDto khỏi newImageDtos
         props.sanPham.newImageDtos.splice(actualIndex, 1);
     }
@@ -369,18 +362,15 @@ const deleteImg = (index, public_id) => {
     // Xóa khỏi danh sách images gốc
     if (props.sanPham.images) {
         const originalIndex = props.sanPham.images.findIndex(img =>
-            img.loaiAnh === 'MOTA' && img.public_id === public_id
+            img.loaiAnh === 'MOTA' && img.publicId === public_id
         );
+        console.log("Xóa ảnh mô tả đã có sẵn (Trước khi xóa)", originalIndex, props.sanPham.images);
         if (originalIndex !== -1) {
             props.sanPham.images.splice(originalIndex, 1);
         }
-    }
+        console.log("Xóa ảnh mô tả đã có sẵn (Sau khi xóa)", props.sanPham.images);
 
-    // Thêm public_id vào danh sách ảnh cần xóa
-    if (!props.sanPham.ttAnhXoa_SP) {
-        props.sanPham.ttAnhXoa_SP = [];
     }
-    props.sanPham.ttAnhXoa_SP.push(public_id);
 };
 
 const getCategoryAttributes = (categoryId) => {

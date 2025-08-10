@@ -3,13 +3,14 @@
     <Header />
 
     <div class="bg-gradient-to-r from-green-600 to-blue-600 shadow-lg fixed top-15 z-990 w-full">
-      <div v-if="showMobileMenu" class="border-t border-white border-opacity-20 animate-slide-down">
+      <div v-if="showMobileMenu" class="border-t border-white border-opacity-20 animate-slide-down" data-dropdown="mobile-menu">
         <div class="px-2 pt-2 pb-3 space-y-1">
           <!-- Thêm các chức năng khác cho mobile menu -->
           <div class="space-y-1">
             <!-- Các chức năng chính -->
             <NuxtLink to="/profile"
-              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors">
+              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors"
+              @click="closeMobileMenu">
               <div class="flex items-center space-x-2">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -20,7 +21,8 @@
             </NuxtLink>
 
             <NuxtLink :to="`/wallet/${userId}`"
-              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors">
+              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors"
+              @click="closeMobileMenu">
               <div class="flex items-center space-x-2">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path
@@ -30,10 +32,9 @@
               </div>
             </NuxtLink>
 
-            Vẫn còn bị lỗi không đóng được component khhi click vào ngoài
-
             <NuxtLink to="/orders"
-              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors">
+              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors"
+              @click="closeMobileMenu">
               <div class="flex items-center space-x-2">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
@@ -46,7 +47,8 @@
             </NuxtLink>
 
             <NuxtLink :to="`/store/${userId}/manage`"
-              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors">
+              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors"
+              @click="closeMobileMenu">
               <div class="flex items-center space-x-2">
                 <!-- Icon Store mới -->
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -58,7 +60,8 @@
             </NuxtLink>
 
             <NuxtLink to="/address"
-              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors">
+              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors"
+              @click="closeMobileMenu">
               <div class="flex items-center space-x-2">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path
@@ -68,32 +71,6 @@
               </div>
             </NuxtLink>
 
-
-            <NuxtLink to="/notifications"
-              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors">
-              <div class="flex items-center space-x-2">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                </svg>
-                <span>Thông báo</span>
-                <span v-if="notificationCount > 0" class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                  {{ notificationCount }}
-                </span>
-              </div>
-            </NuxtLink>
-
-            <NuxtLink to="/settings"
-              class="block px-3 py-2 text-white hover:text-gray-200 hover:bg-white hover:bg-opacity-10 rounded-md transition-colors">
-              <div class="flex items-center space-x-2">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd"
-                    d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                    clip-rule="evenodd" />
-                </svg>
-                <span>Cài đặt</span>
-              </div>
-            </NuxtLink>
           </div>
 
           <!-- Nút đăng xuất -->
@@ -113,7 +90,15 @@
         </div>
       </div>
     </div>
-    <div :class="{ 'backdrop-blur-sm bg-black/30': showMobileMenu }" class="flex-1 flex flex-col">
+    
+    <!-- Backdrop overlay khi mobile menu mở -->
+    <div 
+      v-if="showMobileMenu" 
+      class="fixed inset-0 z-40 bg-gradient-to-b from-black/40 to-transparent backdrop-blur-md"
+      @click="closeMobileMenu"
+    ></div>
+    
+    <div class="flex-1 flex flex-col">
       <main class="flex-1 h-full">
         <slot />
       </main>
@@ -123,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref, provide } from "vue";
+import { ref, provide, onMounted, onUnmounted } from "vue";
 const router = useRouter();
 const { $api } = useNuxtApp();
 const authStore = useAuthStore();
@@ -131,13 +116,32 @@ const userId = ref(null);
 
 const route = useRoute();
 const showMobileMenu = ref(false);
-const toggleMobileMenu = () => (showMobileMenu.value = !showMobileMenu.value);
+
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value;
+};
+
+const closeMobileMenu = () => {
+  showMobileMenu.value = false;
+};
+
+// Đóng mobile menu khi click outside
+const handleClickOutside = (event) => {
+  // Kiểm tra nếu click không phải trên mobile menu button hoặc mobile menu content
+  const isMobileMenuButton = event.target.closest('[data-mobile-menu-button]');
+  const isMobileMenuContent = event.target.closest('[data-dropdown="mobile-menu"]');
+  
+  if (!isMobileMenuButton && !isMobileMenuContent && showMobileMenu.value) {
+    showMobileMenu.value = false;
+  }
+};
 
 const getUserId = async () => {
   await authStore.loadUser();
   userId.value = authStore.user.mssv;
 };
 
+// Đóng mobile menu khi route thay đổi
 watch(
   () => route.fullPath,
   () => {
@@ -147,10 +151,19 @@ watch(
 
 onMounted(() => {
   getUserId();
+  // Thêm event listener để handle click outside
+  document.addEventListener('click', handleClickOutside);
 });
 
+onUnmounted(() => {
+  // Clean up event listener
+  document.removeEventListener('click', handleClickOutside);
+});
+
+// Provide các function cho Header component
 provide("showMobileMenu", showMobileMenu);
 provide("toggleMobileMenu", toggleMobileMenu);
+provide("closeMobileMenu", closeMobileMenu);
 
 const handleLogout = async () => {
   // Xử lý đăng xuất
