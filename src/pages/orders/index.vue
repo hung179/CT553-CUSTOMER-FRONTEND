@@ -381,6 +381,16 @@
       </div>
     </div>
   </div>
+  <Modal 
+      :show="showModal" 
+      :type="modalType" 
+      :title="titleModal" 
+      :message="message" 
+      :confirmText="confirmText"
+      @confirm="handleConfirm()" 
+      @cancel="showModal = false" 
+      @close="showModal = false" 
+    />
 </template>
 
 <script setup>
@@ -400,6 +410,38 @@ const expandedOrders = ref(new Set());
 const showCancelModal = ref(false);
 const orderToCancel = ref(null);
 const cancelLoading = ref(false);
+
+const showModal = ref(false);
+const modalType = ref(null);
+const titleModal = ref(null);
+const message = ref(null);
+const confirmText = ref(null);
+const handleConfirm = ref();
+
+const showModalConfirm = (element, item) => {
+  switch (element.type) {
+    case 'ERROR': {
+      handleConfirm.value = () => { showModal.value = false; };
+      modalType.value = "warning";
+      titleModal.value = "Thông báo";
+      message.value = element.message;
+      confirmText.value = 'Xác nhận';
+      showModal.value = true;
+      break;
+    }
+    case 'SUCCESS': {
+      handleConfirm.value = () => {
+        showModal.value = false;
+       };
+      modalType.value = "success";
+      titleModal.value = "Thông báo";
+      message.value = element.message;
+      confirmText.value = 'Xác nhận';
+      showModal.value = true;
+      break;
+    }
+  }
+}
 
 // Get user MSSV
 const getUserId = async () => {
@@ -476,8 +518,8 @@ const getStatusText = (status) => {
 
 const getSubOrderStatusClass = (orderState) => {
   if (orderState.daNhanTTDH) return 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200';
-  if (orderState.daHuyTTDH) return 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200';
   if (orderState.daHoanTienTTDH) return 'bg-gradient-to-r from-purple-100 to-violet-100 text-purple-800 border border-purple-200';
+  if (orderState.daHuyTTDH) return 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200';
   if (orderState.daGiaoTTDH) return 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border border-blue-200';
   if (orderState.dangGiaoTTDH) return 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border border-orange-200';
   if (orderState.xacNhanTTDH) return 'bg-gradient-to-r from-indigo-100 to-blue-100 text-indigo-800 border border-indigo-200';
@@ -487,8 +529,8 @@ const getSubOrderStatusClass = (orderState) => {
 
 const getSubOrderStatusText = (orderState) => {
   if (orderState.daNhanTTDH) return 'Đã nhận';
-  if (orderState.daHuyTTDH) return 'Đã hủy';
   if (orderState.daHoanTienTTDH) return 'Đã hoàn tiền';
+  if (orderState.daHuyTTDH) return 'Đã hủy';
   if (orderState.daGiaoTTDH) return 'Đã giao';
   if (orderState.dangGiaoTTDH) return 'Đang giao';
   if (orderState.xacNhanTTDH) return 'Đã xác nhận';
@@ -556,23 +598,17 @@ const confirmCancelOrder = async () => {
     
     closeCancelModal();
     
-    // Show success notification
-    showNotification('Đơn hàng đã được hủy thành công!', 'success');
   } catch (err) {
     error.value = err.response?.data?.message || 'Có lỗi xảy ra khi hủy đơn hàng';
-    showNotification('Có lỗi xảy ra khi hủy đơn hàng', 'error');
-    console.error('Error cancelling order:', err);
   } finally {
+    showModalConfirm({
+      type: 'SUCCESS',
+      message: 'Đơn hàng đã được hủy thành công!'
+    });
     cancelLoading.value = false;
   }
 };
 
-// Notification function (you can implement toast notification here)
-const showNotification = (message, type = 'info') => {
-  // This is a placeholder for notification system
-  // You can implement toast notifications here
-  alert(message);
-};
 
 // Pagination functions
 const nextPage = () => {

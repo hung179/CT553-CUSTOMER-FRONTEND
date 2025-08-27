@@ -214,6 +214,16 @@
             </div>
         </div>
     </div>
+    <Modal 
+      :show="showModal" 
+      :type="modalType" 
+      :title="titleModal" 
+      :message="message" 
+      :confirmText="confirmText"
+      @confirm="handleConfirm()" 
+      @cancel="showModal = false" 
+      @close="showModal = false" 
+    />
 </template>
 
 <script setup>
@@ -255,6 +265,38 @@ const notification = ref({
     message: '',
     type: 'success'
 });
+
+const showModal = ref(false);
+const modalType = ref(null);
+const titleModal = ref(null);
+const message = ref(null);
+const confirmText = ref(null);
+const handleConfirm = ref();
+
+const showModalConfirm = (element, item) => {
+  switch (element.type) {
+    case 'ERROR': {
+      handleConfirm.value = () => { showModal.value = false; };
+      modalType.value = "warning";
+      titleModal.value = "Thông báo";
+      message.value = element.message;
+      confirmText.value = 'Xác nhận';
+      showModal.value = true;
+      break;
+    }
+    case 'SUCCESS': {
+      handleConfirm.value = () => {
+        showModal.value = false;
+       };
+      modalType.value = "success";
+      titleModal.value = "Thông báo";
+      message.value = element.message;
+      confirmText.value = 'Xác nhận';
+      showModal.value = true;
+      break;
+    }
+  }
+}
 
 // Computed
 const visiblePages = computed(() => {
@@ -499,19 +541,19 @@ const submitForm = async () => {
                 }
             });
 
-            console.log('Update response:', response);
-            showNotification('Cập nhật địa chỉ thành công');
+            showModalConfirm(response.data);
+
         } else {
             // Create new address
-            await $api.post(`/addresses/create/${mssv}`, formData.value);
-            showNotification('Thêm địa chỉ mới thành công');
+            const response = await $api.post(`/addresses/create/${mssv}`, formData.value);
+            showModalConfirm(response.data);
         }
 
         closeForm();
         await loadAddresses();
     } catch (error) {
         console.error('Error submitting form:', error);
-        showNotification('Có lỗi xảy ra khi lưu địa chỉ', 'error');
+        showModalConfirm({ type: 'ERROR', message: 'Có lỗi xảy ra khi lưu địa chỉ' });
     } finally {
         submitting.value = false;
     }
@@ -527,16 +569,15 @@ const confirmDelete = async () => {
         await authStore.loadUser();
         const mssv = authStore.user.mssv;
 
-        await $api.delete(`/addresses/delete/${mssv}`, {
+        const response = await $api.delete(`/addresses/delete/${mssv}`, {
             params: { maDC: deletingAddressId.value }
         });
 
-        showNotification('Xóa địa chỉ thành công');
+        showModalConfirm(response.data);
         deletingAddressId.value = null;
         await loadAddresses();
     } catch (error) {
-        console.error('Error deleting address:', error);
-        showNotification('Có lỗi xảy ra khi xóa địa chỉ', 'error');
+        showModalConfirm({ type: 'ERROR', message: error.message });
     } finally {
         submitting.value = false;
     }

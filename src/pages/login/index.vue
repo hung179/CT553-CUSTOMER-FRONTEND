@@ -96,6 +96,16 @@
       </form>
     </div>
   </div>
+  <Modal 
+      :show="showModal" 
+      :type="modalType" 
+      :title="titleModal" 
+      :message="message" 
+      :confirmText="confirmText"
+      @confirm="handleConfirm()" 
+      @cancel="showModal = false" 
+      @close="showModal = false" 
+    />
 </template>
 
 <script setup>
@@ -108,6 +118,35 @@ const { $api } = useNuxtApp();
 const text = ref("");
 const password = ref("");
 
+const showModal = ref(false)
+const modalType = ref(null)
+const titleModal = ref(null)
+const message = ref(null)
+const confirmText = ref(null)
+const handleConfirm = ref()
+
+const showModalConfirm = (element) => {
+  switch (element.type) {
+    case 'ACCOUNTLOCKED':
+    case 'UNAUTHENTICATED':
+      handleConfirm.value = () => { showModal.value = false }
+      modalType.value = "warning"
+      titleModal.value = "Thông báo"
+      message.value = element.message
+      confirmText.value = 'Xác nhận'
+      showModal.value = true
+      break
+    case 'error':
+      handleConfirm.value = () => { showModal.value = false }
+      modalType.value = "error"
+      titleModal.value = "Lỗi"
+      message.value = element.message
+      confirmText.value = 'Đóng'
+      showModal.value = true
+      break
+  }
+}
+
 definePageMeta({ layout: "login" });
 
 const handleLogin = async () => {
@@ -116,6 +155,10 @@ const handleLogin = async () => {
     router.push("/");
   } catch (error) {
     console.error("Login error:", error);
+    showModalConfirm(error.response?.data || {
+      type: 'error',
+      message: 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.'
+    });
   }
 };
 </script>

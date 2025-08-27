@@ -1,5 +1,22 @@
 <template>
     <ProductForm :id="maSP" @submit="handleSubmit" />
+     <!-- Loading Component -->
+    <LoadingComponent
+      :show="isLoading"
+      :message="loadingMessage"
+    />
+    
+    <!-- Modal thông báo -->
+    <Modal 
+      :show="showModal" 
+      :type="modalType" 
+      :title="titleModal" 
+      :message="message" 
+      :confirmText="confirmText"
+      @confirm="handleConfirm()" 
+      @cancel="showModal = false" 
+      @close="showModal = false" 
+    />
 </template>
 
 <script setup>
@@ -10,11 +27,50 @@ const { $api } = useNuxtApp();
 
 const maSP = route.query.maSP;
 
-const handleSubmit = async (sanPham) => {
-    if (sanPham.isNew) {
+const showModal = ref(false);
+const modalType = ref(null);
+const titleModal = ref(null);
+const message = ref(null);
+const confirmText = ref(null);
+const handleConfirm = ref();
 
+// Loading states
+const isLoading = ref(false);
+const loadingMessage = ref('');
+
+const showModalConfirm = (element, item) => {
+  switch (element.type) {
+    case 'ERROR': {
+      handleConfirm.value = () => { showModal.value = false; };
+      modalType.value = "warning";
+      titleModal.value = "Thông báo";
+      message.value = element.message;
+      confirmText.value = 'Xác nhận';
+      showModal.value = true;
+      break;
+    }
+    case 'SUCCESS': {
+      handleConfirm.value = () => {
+         router.push(`/store/${authStore.user.mssv}/manage/management/product`);
+        showModal.value = false;
+       };
+      modalType.value = "success";
+      titleModal.value = "Thông báo";
+      message.value = element.message;
+      confirmText.value = 'Xác nhận';
+      showModal.value = true;
+      break;
+    }
+  }
+}
+
+const handleSubmit = async (sanPham) => {
+    isLoading.value = true;
+    if (sanPham.isNew) {
+        loadingMessage.value = 'Đang tạo sản phẩm...';
         await createProduct(sanPham);
     } else {
+        loadingMessage.value = 'Đang cập nhật sản phẩm...';
         await updateProduct(sanPham);
     }
 };
@@ -67,7 +123,6 @@ const createProduct = async (sanPham) => {
 
         if (res.data.success === true) {
             showSuccess();
-            router.push(`/store/${authStore.user.mssv}/manage/management/product`);
         } else {
             showError();
         }
@@ -129,11 +184,6 @@ const updateProduct = async (sanPham) => {
             ]
         };
 
-        console.log("Số ảnh trong DTO:", productDto.images.length);
-        console.log("Số file gửi đi:", allFiles.length);
-        console.log("Files cũ:", oldFiles.length);
-        console.log("Files mới:", sanPham.newFiles.length);
-
         // 4. Append ProductDto
         formData.append("productRequestDto", new Blob([JSON.stringify(productDto)], {
             type: 'application/json'
@@ -147,15 +197,13 @@ const updateProduct = async (sanPham) => {
         // 6. Gửi API Update
         const res = await $api.patch(`products/update/${sanPham.maSP}`, formData);
 
-        if (res.data) {
-            showSuccess();
-            router.push(`/store/${authStore.user.mssv}/manage/management/product`);
+        if (res.data.success === true) {
+            showModalConfirm(res.data);
         } else {
             showError();
         }
 
     } catch (error) {
-        console.error("Lỗi cập nhật sản phẩm:", error);
         showError();
     }
 };
@@ -171,14 +219,12 @@ const showError = () => {
 };
 
 function convertLoaiAnh(loaiAnh) {
-    console.log("Chuyển đổi loại ảnh:", loaiAnh);
     const mapping = {
         "DAIDIEN": "Đại diện",
         "MOTA": "Mô tả",
         "Đại diện": "Đại diện",
         "Mô tả": "Mô tả",
     };
-    console.log("Kết quả chuyển đổi:", mapping[loaiAnh]);
     return mapping[loaiAnh]; // fallback nếu không khớp
 }
 

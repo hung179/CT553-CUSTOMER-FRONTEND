@@ -15,21 +15,24 @@ export const useAuthStore = defineStore('auth', {
     async login(credential: any) {
 
       const { $api } = useNuxtApp()
-      console.log(credential)
       const response = await $api.post('students/auth/token', credential);
 
-      const event = useRequestEvent();
+      // Chưa kiểm tra các chức năng của quản trị viên
+      // Còn phải chuẩn bị dữ liệu kiểm thử
 
-      if (import.meta.server && event) {
-        setCookie(event, 'access_token', response.data.token, {
-          path: '/',
-          httpOnly: false,
-          maxAge: 60 * 60 * 24,
-        });
-      } else {
-        const cookie = useCookie('access_token');
-        cookie.value = response.data.token;
-        this.accessToken = response.data.token;
+      const event = useRequestEvent();
+      if (response.data.authenticated) {
+        if (import.meta.server && event) {
+          setCookie(event, 'access_token', response.data.token, {
+            path: '/',
+            httpOnly: false,
+            maxAge: 60 * 60 * 24,
+          });
+        } else {
+          const cookie = useCookie('access_token');
+          cookie.value = response.data.token;
+          this.accessToken = response.data.token;
+        }
       }
     },
 
@@ -45,7 +48,7 @@ export const useAuthStore = defineStore('auth', {
         }
       } catch (err) {
         console.error('Lỗi loadUser:', err)
-        this.clearAuth() 
+        this.clearAuth()
       }
     },
     clearAuth() {

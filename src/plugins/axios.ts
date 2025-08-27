@@ -29,7 +29,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         async (error) => {
             if (error.response?.status === 401 || error.response?.status === 403) {
                 console.error("Token hết hạn hoặc không hợp lệ:", error);
-                authStore.logout();
+                authStore.clearAuth();
                 router.push("/login");
             }
             return Promise.reject(error);
